@@ -17,14 +17,14 @@ import config
 from components import Board
 from pygame.locals import Rect
 
-
+# 게임의 현재 상태를 화면에 시각적으로 표현하는 클래스
 class Renderer:
     """Draws the Minesweeper UI.
 
     Knows how to draw individual cells with flags/numbers, header info,
     and end-of-game overlays with a semi-transparent background.
     """
-
+    # Pygame 초기화, 화면 클릭설정, Board, Renderer, InputController 인스턴스 생성 및 연결 담당
     def __init__(self, screen: pygame.Surface, board: Board):
         self.screen = screen
         self.board = board
@@ -96,19 +96,22 @@ class Renderer:
         rect = label.get_rect(center=(config.width // 2, config.height // 2))
         self.screen.blit(label, rect)
 
-
+# 사용자의 마우스 클릭을 실제 게임 액션으로 변환하는 클래스
 class InputController:
     """Translates input events into game and board actions."""
 
     def __init__(self, game: "Game"):
         self.game = game
 
+    # 그리드로 변환 ( 사용자 클릭 위치를 받아 게임 보드의 어느 셸인지 알려주는 역할. )
     def pos_to_grid(self, x: int, y: int):
         """Convert pixel coordinates to (col,row) grid indices or (-1,-1) if out of bounds."""
+        # 게임 영역을 벗어나면 -1,-1 튜플을 반환 
         if not (config.margin_left <= x < config.width - config.margin_right):
             return -1, -1
         if not (config.margin_top <= y < config.height - config.margin_bottom):
             return -1, -1
+        # 그리드 좌표로 변환
         col = (x - config.margin_left) // config.cell_size
         row = (y - config.margin_top) // config.cell_size
         if 0 <= col < self.game.board.cols and 0 <= row < self.game.board.rows:
@@ -117,32 +120,39 @@ class InputController:
 
     def handle_mouse(self, pos, button) -> None:
         # TODO: Handle mouse button events: left=reveal, right=flag, middle=neighbor highlight  in here
-        # col, row = self.pos_to_grid(pos[0], pos[1])
-        # if col == -1:
-        #     return
-        # game = self.game
-        # if button == config.mouse_left:
-        #     game.highlight_targets.clear()
+        col, row = self.pos_to_grid(pos[0], pos[1])
+        if col == -1:
+            return
+        game = self.game
         
-        #         if not game.started:
-        #             game.started = 
-        #             game.start_ticks_ms = pygame.time.get_ticks()
-    
-        # elif button == config.mouse_right:
-        #     game.highlight_targets.clear()
-        #        
-        # elif button == config.mouse_middle:
-        #         neighbors = []
-        #         game.highlight_targets = {
-        #             (nc, nr)
-        #             for (nc, nr) in neighbors
-        #             if not game.board.cells[game.board.index(nc, nr)].state.is_revealed
-        #         }
+        # 좌클릭(1)
+        if button == config.mouse_left:
+            game.highlight_targets.clear()
+
+        # 게임이 시작되지 않앗을 경우      
+            if not game.started:
+                game.started = True
+                game.start_ticks_ms = pygame.time.get_ticks()
+            game.board.reveal(col, row)
         
-        #         game.highlight_until_ms = pygame.time.get_ticks() + config.highlight_duration_ms
+        # 우클릭(3)
+        elif button == config.mouse_right:
+            game.highlight_targets.clear()
+            game.board.toggle_flag(col, row) # 플래그 on/off
+        
+        # 휠(2)
+        elif button == config.mouse_middle:
+                neighbors = game.board.neighbors[col,row]
+                game.highlight_targets = {
+                    # 공개된 셸 여부 확인
+                    (nc, nr) for (nc, nr) in neighbors if not game.board.cells[game.board.index(nc, nr)].state.is_revealed
+                }
+        
+                game.highlight_until_ms = pygame.time.get_ticks() + config.highlight_duration_ms
 
-        pass
+        # pass
 
+# Pygame을 초기화하고 게임 상태를 추적하며, 전체 게임 루프를 조정하는 역할
 class Game:
     """Main application object orchestrating loop and high-level state."""
 
