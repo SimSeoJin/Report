@@ -133,7 +133,7 @@ class InputController:
             if not game.started:
                 game.started = True
                 game.start_ticks_ms = pygame.time.get_ticks()
-            game.board.reveal(col, row)
+            game.board.reveal(col, row) # reveal 호출
         
         # 우클릭(3)
         elif button == config.mouse_right:
