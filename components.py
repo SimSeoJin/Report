@@ -71,18 +71,22 @@ class Board:
         # TODO: Return True if (col,row) is inside the board bounds.
         return 0 <= col < self.cols and 0 <= row < self.rows
         # pass
-
+# 주변 이웃(8개 셀) 좌표 반환
     def neighbors(self, col: int, row: int) -> List[Tuple[int, int]]:
         # TODO: Return list of valid neighboring coordinates around (col,row).
-        # deltas = [
-        #     (-1, -1), (0, -1), (1, -1),
-        #     (-1, 0),            (1, 0),
-        #     (-1, 1),  (0, 1),  (1, 1),
-        # ]
-        # result = []
-        
-        # return result
-        pass
+        deltas = [
+            (-1, -1), (0, -1), (1, -1),
+            (-1, 0),            (1, 0),
+            (-1, 1),  (0, 1),  (1, 1),
+        ]
+        result = []
+        for c,r in deltas:
+            n_c = col + c 
+            n_r = row + r
+            if self.is_inbounds(n_c,n_r):
+                result.append((n_c,n_r))
+        return result
+        # pass
 
     def place_mines(self, safe_col: int, safe_row: int) -> None:
         # TODO: Place mines randomly, guaranteeing the first click and its neighbors are safe. And Compute adjacency counts
