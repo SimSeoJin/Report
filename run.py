@@ -142,7 +142,7 @@ class InputController:
         
         # 휠(2)
         elif button == config.mouse_middle:
-                neighbors = game.board.neighbors[col,row]
+                neighbors = game.board.neighbors(col,row)
                 game.highlight_targets = {
                     # 공개된 셸 여부 확인
                     (nc, nr) for (nc, nr) in neighbors if not game.board.cells[game.board.index(nc, nr)].state.is_revealed
